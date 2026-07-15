@@ -2,6 +2,42 @@ import { useState } from "react";
 import { supabase } from "./supabaseClient";
 import { useSoundEffects } from "./useSoundEffects";
 
+// Helper dictionary directly maps color props to Tailwind classes
+const colorMap = {
+  cyan: { text: "text-cyan-400", borderFocus: "focus:border-cyan-400", ring: "focus:ring-cyan-400", borderHover: "hover:border-cyan-500/50", borderGroup: "border-cyan-900/50", textInput: "text-cyan-100", symbol: "text-cyan-500/50", borderOutline: "border-cyan-400" },
+  green: { text: "text-green-400", borderFocus: "focus:border-green-400", ring: "focus:ring-green-400", borderHover: "hover:border-green-500/50", borderGroup: "border-green-900/50", textInput: "text-green-100", symbol: "text-green-500/50", borderOutline: "border-green-400" },
+  purple: { text: "text-purple-400", borderFocus: "focus:border-purple-400", ring: "focus:ring-purple-400", borderHover: "hover:border-purple-500/50", borderGroup: "border-purple-900/50", textInput: "text-purple-100", symbol: "text-purple-500/50", borderOutline: "border-purple-400" },
+};
+
+const InputField = ({ label, name, type="text", placeholder, color="cyan", delay="0s", value, onChange, onMouseEnter, onKeyDown }) => {
+  const theme = colorMap[color];
+  
+  return (
+    <div className="relative group animate-reveal" style={{ animationDelay: delay }}>
+      <label className={`block text-[10px] uppercase tracking-widest font-black ${theme.text} mb-1 drop-shadow-[0_0_5px_rgba(0,0,0,1)]`}>
+        {label}
+      </label>
+      <div className="relative">
+        <span className={`absolute left-3 top-2.5 ${theme.symbol} font-mono`}>{'>'}</span>
+        <input 
+          type={type} 
+          name={name} 
+          value={value}
+          required 
+          onMouseEnter={onMouseEnter}
+          onKeyDown={onKeyDown}
+          className={`w-full bg-black/80 border ${theme.borderGroup} ${theme.textInput} text-sm rounded-lg pl-8 pr-3 py-2 
+                      focus:outline-none ${theme.borderFocus} focus:ring-1 ${theme.ring} 
+                      ${theme.borderHover} transition-all font-mono shadow-[inset_0_0_10px_rgba(0,0,0,0.5)]`} 
+          placeholder={placeholder} 
+          onChange={onChange} 
+        />
+        <div className={`absolute inset-0 border ${theme.borderOutline} rounded-lg opacity-0 group-hover:opacity-20 transition-opacity pointer-events-none`}></div>
+      </div>
+    </div>
+  );
+};
+
 export default function RegistrationForm() {
   const [formData, setFormData] = useState({
     nombre: "", fecha_nacimiento: "", 
@@ -55,41 +91,6 @@ export default function RegistrationForm() {
     );
   }
 
-  // Helper dictionary directly maps color props to Tailwind classes
-  const colorMap = {
-    cyan: { text: "text-cyan-400", borderFocus: "focus:border-cyan-400", ring: "focus:ring-cyan-400", borderHover: "hover:border-cyan-500/50", borderGroup: "border-cyan-900/50", textInput: "text-cyan-100", symbol: "text-cyan-500/50", borderOutline: "border-cyan-400" },
-    green: { text: "text-green-400", borderFocus: "focus:border-green-400", ring: "focus:ring-green-400", borderHover: "hover:border-green-500/50", borderGroup: "border-green-900/50", textInput: "text-green-100", symbol: "text-green-500/50", borderOutline: "border-green-400" },
-    purple: { text: "text-purple-400", borderFocus: "focus:border-purple-400", ring: "focus:ring-purple-400", borderHover: "hover:border-purple-500/50", borderGroup: "border-purple-900/50", textInput: "text-purple-100", symbol: "text-purple-500/50", borderOutline: "border-purple-400" },
-  };
-
-  const InputField = ({ label, name, type="text", placeholder, color="cyan", delay="0s" }) => {
-    const theme = colorMap[color];
-    
-    return (
-      <div className="relative group animate-reveal" style={{ animationDelay: delay }}>
-        <label className={`block text-[10px] uppercase tracking-widest font-black ${theme.text} mb-1 drop-shadow-[0_0_5px_rgba(0,0,0,1)]`}>
-          {label}
-        </label>
-        <div className="relative">
-          <span className={`absolute left-3 top-2.5 ${theme.symbol} font-mono`}>{'>'}</span>
-          <input 
-            type={type} 
-            name={name} 
-            required 
-            onMouseEnter={playHover}
-            onKeyDown={playType}
-            className={`w-full bg-black/80 border ${theme.borderGroup} ${theme.textInput} text-sm rounded-lg pl-8 pr-3 py-2 
-                        focus:outline-none ${theme.borderFocus} focus:ring-1 ${theme.ring} 
-                        ${theme.borderHover} transition-all font-mono shadow-[inset_0_0_10px_rgba(0,0,0,0.5)]`} 
-            placeholder={placeholder} 
-            onChange={handleChange} 
-          />
-          <div className={`absolute inset-0 border ${theme.borderOutline} rounded-lg opacity-0 group-hover:opacity-20 transition-opacity pointer-events-none`}></div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="max-w-3xl mx-auto p-1 bg-gradient-to-b from-cyan-900/30 to-black rounded-lg shadow-[0_0_50px_rgba(6,-182,212,0.15)] relative animate-reveal">
       <div className="bg-black/90 p-8 rounded-lg relative overflow-hidden border border-cyan-900/50">
@@ -116,8 +117,8 @@ export default function RegistrationForm() {
               <h3 className="text-cyan-500 text-[10px] font-black tracking-widest uppercase">1. Perfil Básico</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <InputField label="Nombre Alias" name="nombre" placeholder="Ej: Neo..." color="cyan" delay="0.25s" />
-              <InputField label="Nacimiento" name="fecha_nacimiento" type="date" color="cyan" delay="0.3s" />
+              <InputField label="Nombre Alias" name="nombre" value={formData.nombre} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: Neo..." color="cyan" delay="0.25s" />
+              <InputField label="Nacimiento" name="fecha_nacimiento" value={formData.fecha_nacimiento} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} type="date" color="cyan" delay="0.3s" />
             </div>
           </div>
 
@@ -127,10 +128,10 @@ export default function RegistrationForm() {
               <h3 className="text-green-500 text-[10px] font-black tracking-widest uppercase">2. Vínculos Cercanos</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <InputField label="Padre/Madre" name="padres" placeholder="Ej: Roberto" color="green" delay="0.4s" />
-              <InputField label="Hermanos/as" name="hermanos" placeholder="Ej: Lucia, Pedro" color="green" delay="0.45s" />
-              <InputField label="Pareja / BFF" name="pareja" placeholder="Ej: Carlos" color="green" delay="0.5s" />
-              <InputField label="Mascota" name="mascota" placeholder="Ej: Firulais" color="green" delay="0.55s" />
+              <InputField label="Padre/Madre" name="padres" value={formData.padres} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: Roberto" color="green" delay="0.4s" />
+              <InputField label="Hermanos/as" name="hermanos" value={formData.hermanos} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: Lucia, Pedro" color="green" delay="0.45s" />
+              <InputField label="Pareja / BFF" name="pareja" value={formData.pareja} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: Carlos" color="green" delay="0.5s" />
+              <InputField label="Mascota" name="mascota" value={formData.mascota} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: Firulais" color="green" delay="0.55s" />
             </div>
           </div>
 
@@ -140,12 +141,12 @@ export default function RegistrationForm() {
               <h3 className="text-purple-500 text-[10px] font-black tracking-widest uppercase">3. Preferencias Personales</h3>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <InputField label="Hobbie" name="hobby" placeholder="Ej: Futbol, Piano" color="purple" delay="0.65s" />
-              <InputField label="Artista/Banda" name="artista" placeholder="Ej: BTS..." color="purple" delay="0.7s" />
-              <InputField label="Pelicula/Serie" name="pelicula" placeholder="Ej: Matrix..." color="purple" delay="0.75s" />
-              <InputField label="Comida Favorita" name="comida_favorita" placeholder="Ej: Pizza" color="purple" delay="0.8s" />
+              <InputField label="Hobbie" name="hobby" value={formData.hobby} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: Futbol, Piano" color="purple" delay="0.65s" />
+              <InputField label="Artista/Banda" name="artista" value={formData.artista} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: BTS..." color="purple" delay="0.7s" />
+              <InputField label="Pelicula/Serie" name="pelicula" value={formData.pelicula} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: Matrix..." color="purple" delay="0.75s" />
+              <InputField label="Comida Favorita" name="comida_favorita" value={formData.comida_favorita} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: Pizza" color="purple" delay="0.8s" />
               <div className="md:col-span-2">
-                <InputField label="Color Favorito" name="color_favorito" placeholder="Ej: Azul Marino" color="purple" delay="0.85s" />
+                <InputField label="Color Favorito" name="color_favorito" value={formData.color_favorito} onChange={handleChange} onMouseEnter={playHover} onKeyDown={playType} placeholder="Ej: Azul Marino" color="purple" delay="0.85s" />
               </div>
             </div>
           </div>
@@ -166,6 +167,7 @@ export default function RegistrationForm() {
               <input 
                 type="password" 
                 name="password" 
+                value={formData.password}
                 required 
                 onMouseEnter={playHover}
                 onKeyDown={playType}
