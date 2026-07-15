@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
+import { useSoundEffects } from "./useSoundEffects";
 
 export default function HackingConsole() {
   const [users, setUsers] = useState([]);
@@ -11,6 +12,8 @@ export default function HackingConsole() {
   const [loading, setLoading] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
   const MAX_ATTEMPTS = 3;
+
+  const { playHover, playType, playWin, playLoseAttempt, playGameOver } = useSoundEffects();
 
   useEffect(() => {
     async function fetchUsers() {
@@ -75,12 +78,15 @@ export default function HackingConsole() {
     if (guess.toLowerCase() === targetUser.password.toLowerCase() || guess === targetUser.password) {
       setHacked(true);
       setClue("");
+      playWin();
     } else {
       if (currentAttempt >= MAX_ATTEMPTS) {
         setClue("ALERTA MÁXIMA. IP BLOQUEADA. DESCONECTANDO VÍNCULO.");
+        playGameOver();
       } else {
         const newClue = generateClue(guess, targetUser);
         setClue(newClue);
+        playLoseAttempt();
       }
     }
     
@@ -208,8 +214,8 @@ export default function HackingConsole() {
               <div>
                 <label className="block text-green-500 mb-4 font-bold">{">_ INGRESE LAS DEDUCCIONES DE CONTRASEÑA EN EL TERMINAL:"}</label>
                 <div className="flex flex-col md:flex-row gap-4">
-                  <input type="text" required disabled={loading} className="flex-1 bg-gray-900 border-2 border-green-500/30 text-green-400 rounded-xl px-6 py-5 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 transition-all font-mono text-3xl" placeholder="Ej: Matrix1999" value={guess} onChange={(e) => setGuess(e.target.value)} autoComplete="off" />
-                  <button type="submit" disabled={loading || !guess} className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-500 text-black font-black px-12 py-5 rounded-xl text-xl uppercase transition-all shadow-[0_0_30px_rgba(34,197,94,0.3)] disabled:opacity-50 hover:scale-105">
+                  <input type="text" required disabled={loading} className="flex-1 bg-gray-900 border-2 border-green-500/30 text-green-400 rounded-xl px-6 py-5 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 transition-all font-mono text-3xl" placeholder="Ej: Matrix1999" value={guess} onChange={(e) => setGuess(e.target.value)} onKeyDown={playType} onMouseEnter={playHover} autoComplete="off" />
+                  <button type="submit" disabled={loading || !guess} onMouseEnter={playHover} className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-500 text-black font-black px-12 py-5 rounded-xl text-xl uppercase transition-all shadow-[0_0_30px_rgba(34,197,94,0.3)] disabled:opacity-50 hover:scale-105">
                     {loading ? "..." : "EJECUTAR ATAQUE"}
                   </button>
                 </div>
